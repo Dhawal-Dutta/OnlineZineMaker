@@ -1,5 +1,10 @@
 const canvas = new fabric.Canvas('zineCanvas');
 
+// Make controls larger for easier touch interaction
+fabric.Object.prototype.cornerSize = 24; 
+fabric.Object.prototype.transparentCorners = false;
+fabric.Object.prototype.cornerColor = '#2196f3';
+
 const paperDimensions = {
     'a5': { w: 2480, h: 1748 }, 'a4': { w: 3508, h: 2480 }, 'a3': { w: 4960, h: 3508 },
     'a2': { w: 7016, h: 4960 }, 'a1': { w: 9933, h: 7016 }
