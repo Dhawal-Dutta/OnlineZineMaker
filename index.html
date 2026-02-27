@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>My Zine Designer</title>
+    <link href="https://fonts.googleapis.com/css2?family=Anton&family=Bebas+Neue&family=Courier+Prime&family=Lora:ital,wght@0,400;0,700;1,400&family=Merriweather:ital,wght@0,400;0,700;1,400&family=Montserrat:ital,wght@0,400;0,700;1,400&family=Oswald:wght@400;700&family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Raleway:ital,wght@0,400;0,700;1,400&family=Roboto:ital,wght@0,400;0,700;1,400&family=Space+Mono&family=Titillium+Web:wght@400;700&display=swap" rel="stylesheet">
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/fabric.js/5.3.1/fabric.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <div id="left-toolbar">
+        <h2 style="margin: 0;">Zine Tools</h2>
+        
+        <div class="tool-section">
+            <p>Project Files</p>
+            <div class="row">
+                <button id="saveProject">Save (.json)</button>
+                <label for="loadProject" class="btn-label">Load (.json)</label>
+                <input type="file" id="loadProject" accept=".json" style="display: none;">
+            </div>
+        </div>
+        
+        <div class="tool-section">
+            <p>Paper Size & Color</p>
+            <select id="paperSize">
+                <option value="a5">A5 (300dpi)</option>
+                <option value="a4" selected>A4 (300dpi)</option>
+                <option value="a3">A3 (300dpi)</option>
+                <option value="a2">A2 (300dpi)</option>
+                <option value="a1">A1 (300dpi)</option>
+            </select>
+            <input type="color" id="canvasColor" value="#ffffff" style="width: 100%; height: 30px; border: none; padding: 0;">
+        </div>
+        
+        <div class="tool-section">
+            <p>Typography</p>
+            <button id="addText">Add Text Box</button>
+            <div class="row">
+                <select id="fontFamily">
+                    <option value="Helvetica" style="font-family: Helvetica;">Helvetica</option>
+                    <option value="Times New Roman" style="font-family: 'Times New Roman';">Times New Roman</option>
+                    <option value="Montserrat" style="font-family: 'Montserrat';">Montserrat</option>
+                    <option value="Roboto" style="font-family: 'Roboto';">Roboto</option>
+                    <option value="Raleway" style="font-family: 'Raleway';">Raleway</option>
+                    <option value="Playfair Display" style="font-family: 'Playfair Display';">Playfair Display</option>
+                    <option value="Lora" style="font-family: 'Lora';">Lora</option>
+                    <option value="Merriweather" style="font-family: 'Merriweather';">Merriweather</option>
+                    <option value="Oswald" style="font-family: 'Oswald';">Oswald</option>
+                    <option value="Anton" style="font-family: 'Anton';">Anton</option>
+                    <option value="Bebas Neue" style="font-family: 'Bebas Neue';">Bebas Neue</option>
+                    <option value="Titillium Web" style="font-family: 'Titillium Web';">Titillium Web</option>
+                    <option value="Space Mono" style="font-family: 'Space Mono';">Space Mono</option>
+                    <option value="Courier Prime" style="font-family: 'Courier Prime';">Courier Prime</option>
+                </select>
+                <input type="number" id="fontSize" value="80" style="width: 60px;" title="Font Size">
+            </div>
+            <input type="color" id="textColor" value="#000000" style="width: 100%; height: 25px; border: none; padding: 0; margin-top: 5px;" title="Change Text Color">
+            
+            <label for="fontLoader" class="btn-label" style="margin-top: 5px; display: block; background: #e0f2fe; border-color: #bae6fd;">Upload Custom Font (.ttf / .otf)</label>
+            <input type="file" id="fontLoader" accept=".ttf,.otf,.woff,.woff2" style="display: none;">
+        </div>
+
+        <div class="tool-section">
+            <p>Photography</p>
+            <label for="imageLoader" class="btn-label">Upload Image</label>
+            <input type="file" id="imageLoader" accept="image/*" style="display: none;">
+            <button id="cropBtn" style="margin-top: 5px; border: 1px solid #999;">Crop Image</button>
+        </div>
+        
+        <div class="tool-section">
+            <p>Object Controls</p>
+            <div class="row">
+                <button id="rotateObj">Rotate 180°</button>
+                <button id="undoBtn">Undo (Ctrl+Z)</button>
+            </div>
+            <label style="display: flex; align-items: center; justify-content: center; gap: 5px; font-size: 13px; cursor: pointer; margin-top: 5px; background: #e9ecef; padding: 6px; border-radius: 4px; border: 1px solid #ccc;">
+                <input type="checkbox" id="snapToggle" checked> Magnetic Snapping
+            </label>
+        </div>
+
+    </div>
+
+    <div id="workspace">
+        <canvas id="zineCanvas"></canvas>
+    </div>
+
+    <div id="right-toolbar">
+        <h2 style="margin: 0; font-size: 18px; border-bottom: 2px solid #333; padding-bottom: 5px;">Layers</h2>
+        
+        <div id="layersContainer"></div>
+        
+        <button id="exportPdf" style="background: black; color: white; padding: 12px; font-weight: bold; font-size: 14px; margin-top: 15px; width: 100%; cursor: pointer;">Export Print PDF</button>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
