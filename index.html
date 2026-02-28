@@ -1,9 +1,24 @@
+
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta charset="UTF-8">
-    <title>My Zine Designer</title>
+    <title>Free Online Zine Maker | Browser-Based Photo Layout Engine</title>
+    <meta name="description" content="A free, memory-safe, browser-based layout engine for sequencing photography zines and monographs. Features non-destructive editing, 3D flip previews, and 300dpi print-ready PDF export.">
+    <meta name="keywords" content="zine maker, photo zine layout, browser layout engine, photography sequencing, free InDesign alternative, print-ready zine, photography monograph">
+    <meta name="author" content="Your Name">
+
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://onlinezinemaker.netlify.app/">
+    <meta property="og:title" content="Free Online Zine Maker | Browser-Based Photo Layout Engine">
+    <meta property="og:description" content="A lightweight, browser-based layout engine for sequencing photo zines. Drop in 300dpi files, test your folds in 3D, and export print-ready PDFs without crashing your RAM.">
+    
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:url" content="https://onlinezinemaker.netlify.app/">
+    <meta name="twitter:title" content="Free Online Zine Maker | Browser-Based Photo Layout Engine">
+    <meta name="twitter:description" content="A lightweight, browser-based layout engine for sequencing photo zines. Drop in 300dpi files, test your folds in 3D, and export print-ready PDFs.">
     <link href="https://fonts.googleapis.com/css2?family=Anton&family=Bebas+Neue&family=Courier+Prime&family=Lora:ital,wght@0,400;0,700;1,400&family=Merriweather:ital,wght@0,400;0,700;1,400&family=Montserrat:ital,wght@0,400;0,700;1,400&family=Oswald:wght@400;700&family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Raleway:ital,wght@0,400;0,700;1,400&family=Roboto:ital,wght@0,400;0,700;1,400&family=Space+Mono&family=Titillium+Web:wght@400;700&display=swap" rel="stylesheet">
     
     <script src="https://cdnjs.cloudflare.com/ajax/libs/fabric.js/5.3.1/fabric.min.js"></script>
@@ -13,7 +28,10 @@
 <body>
 
     <div id="left-toolbar">
-        <h2 style="margin: 0;">Zine Tools</h2>
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+            <h2 style="margin: 0;">Zine Tools</h2>
+            <button id="helpBtn" style="background: #2196f3; color: white; border: none; font-size: 12px; padding: 6px 10px; border-radius: 4px;">Guide</button>
+        </div>
         
         <div class="tool-section">
             <p>Project Files</p>
@@ -67,7 +85,7 @@
         <div class="tool-section">
             <p>Photography</p>
             <label for="imageLoader" class="btn-label">Upload Image</label>
-            <input type="file" id="imageLoader" accept="image/*" style="display: none;">
+            <input type="file" id="imageLoader" accept="image/*" multiple style="display: none;">
             <button id="cropBtn" style="margin-top: 5px; border: 1px solid #999;">Crop Image</button>
         </div>
         
@@ -92,10 +110,56 @@
         <h2 style="margin: 0; font-size: 18px; border-bottom: 2px solid #333; padding-bottom: 5px;">Layers</h2>
         
         <div id="layersContainer"></div>
-        
-        <button id="exportPdf" style="background: black; color: white; padding: 12px; font-weight: bold; font-size: 14px; margin-top: 15px; width: 100%; cursor: pointer;">Export Print PDF</button>
+
+        <div style="display: flex; flex-direction: column; gap: 10px; margin-top: 15px;">
+            <button id="previewBtn" style="background: #2196f3; color: white; padding: 12px; font-weight: bold; font-size: 14px; cursor: pointer; border: none; border-radius: 4px;">3D Flip Preview</button>
+            <button id="exportPdf" style="background: black; color: white; padding: 12px; font-weight: bold; font-size: 14px; cursor: pointer; border: none; border-radius: 4px;">Export Print PDF</button>
+        </div>
+    </div>
+
+    <div id="previewModal" style="display: none;">
+        <div class="modal-content">
+            <div id="book-container">
+                <div id="zine-book">
+                    </div>
+            </div>
+            <div class="modal-controls">
+                <button onclick="prevPage()">← Previous</button>
+                <button onclick="nextPage()">Next →</button>
+                <button id="closePreview" style="background: #ff4444; color: white; border: none;">Close Preview</button>
+            </div>
+        </div>
     </div>
 
     <script src="app.js"></script>
+
+    <div id="helpModal" style="display: none;">
+        <div class="modal-content help-content">
+            <h2 style="margin-top: 0; border-bottom: 2px solid #eee; padding-bottom: 10px;">How to Use My Zine Designer</h2>
+            <div class="help-text">
+                <p>Welcome to a specialized layout engine built for sequencing 8-page folding photo zines. Everything processes locally on your computer!no servers, no compressions, no crashes.</p>
+                
+                <h3 style="margin-bottom: 5px; color: #2196f3;"> Project Management</h3>
+                <p><strong>Save & Load (.json):</strong> Never lose your work. Click "Save" to download your raw workspace file. You can load this exact file back into the tool tomorrow to pick up right where you left off.</p>
+                
+                <h3 style="margin-bottom: 5px; color: #2196f3;"> Photography & Layers</h3>
+                <p><strong>Non-Destructive Cropping:</strong> Select a photo and click "Crop Image." Adjust the red dashed box to frame your shot, then click "Apply Crop." You can always un-crop later without losing original pixel quality.</p>
+                <p><strong>Layer Stack:</strong> Use the right-hand sidebar to see all your objects. Click the <b>↑</b> and <b>↓</b> arrows to stack text over images, or the <b>✕</b> to delete.</p>
+
+                <h3 style="margin-bottom: 5px; color: #2196f3;"> Layout & Alignment</h3>
+                <p><strong>The Upside-Down Row:</strong> Because of how a single-sheet zine folds, the top row of pages (Pages 1, 2, 3, 4) must be printed upside down. Select your photos/text on the top row and click <b>Rotate 180°</b>.</p>
+                <p><strong>Magnetic Snapping:</strong> Objects will automatically snap to the blue fold guides and page centers. Toggle this off in the bottom-left if you want free-form placement.</p>
+
+                <h3 style="margin-bottom: 5px; color: #2196f3;"> Custom Typography</h3>
+                <p><strong>Upload Fonts:</strong> Don't want to use the default fonts? Click "Upload Custom Font" and select any <b>.ttf</b> or <b>.otf</b> file from your hard drive to instantly load it into your design.</p>
+
+                <h3 style="margin-bottom: 5px; color: #2196f3;"> Preview & Export</h3>
+                <p><strong>3D Flip Preview:</strong> Confused by the layout? Click this to generate a virtual folding book. It proves your sequencing is correct before you waste printer ink.</p>
+                <p><strong>Export Print PDF:</strong> Generates a high-resolution, 300dpi file ready for the print lab. The blue folding guides are automatically hidden in the final PDF.</p>
+            </div>
+            <button id="closeHelp" style="background: #333; color: white; padding: 10px 20px; border: none; border-radius: 4px; font-weight: bold; cursor: pointer; margin-top: 15px; width: 100%;">Got it, let's design!</button>
+        </div>
+    </div>
+
 </body>
 </html>

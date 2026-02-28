@@ -140,3 +140,128 @@ input[type="number"], select {
     text-overflow: ellipsis;
     max-width: 100px;
 }
+
+/* --- MOBILE RESPONSIVE UPDATES --- */
+
+@media (max-width: 800px) {
+    body {
+        flex-direction: column; /* Stacks panels vertically */
+        overflow-y: auto;       /* Allows scrolling on phones */
+        height: auto;
+    }
+
+    #left-toolbar, #right-toolbar {
+        width: 100%;           /* Toolbars take full width */
+        box-sizing: border-box;
+        box-shadow: none;
+        border-bottom: 1px solid #ccc;
+    }
+
+    #workspace {
+        width: 100%;
+        min-height: 300px;     /* Ensures canvas has room */
+        padding: 10px;
+        background-color: #333;
+    }
+
+    /* Adjust the row of buttons for smaller screens */
+    .row {
+        flex-wrap: wrap; 
+    }
+
+    /* Ensure Export button is always easy to tap */
+    #exportPdf {
+        position: sticky;
+        bottom: 0;
+        z-index: 20;
+    }
+}
+
+/* THE 3D POPUP MODAL */
+#previewModal {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100vw; height: 100vh;
+    background: rgba(0, 0, 0, 0.9);
+    z-index: 9999;
+}
+
+.modal-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 30px;
+}
+
+/* THE VIRTUAL BOOK */
+#book-container {
+    perspective: 2000px;
+    width: 350px;  /* Size of a single printed page */
+    height: 500px;
+}
+
+#zine-book {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    transform-style: preserve-3d;
+}
+
+.modal-controls {
+    display: flex;
+    gap: 15px;
+}
+
+.modal-controls button {
+    padding: 10px 25px;
+    font-weight: bold;
+    cursor: pointer;
+    border-radius: 4px;
+}
+
+/* --- HELP MODAL STYLES --- */
+#helpModal {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100vw; height: 100vh;
+    background: rgba(0, 0, 0, 0.8);
+    z-index: 9999;
+    justify-content: center;
+    align-items: center;
+}
+
+.help-content {
+    background: #fff;
+    padding: 30px;
+    border-radius: 8px;
+    max-width: 450px;
+    width: 90%;
+    text-align: left;
+    box-shadow: 0 4px 25px rgba(0,0,0,0.5);
+    color: #333;
+}
+
+.help-content {
+    background: #fff;
+    padding: 30px;
+    border-radius: 8px;
+    max-width: 550px; /* Made slightly wider */
+    width: 90%;
+    text-align: left;
+    box-shadow: 0 4px 25px rgba(0,0,0,0.5);
+    color: #333;
+}
+
+.help-text {
+    max-height: 60vh; /* Prevents it from being taller than the screen */
+    overflow-y: auto; /* Adds a scrollbar if needed */
+    padding-right: 15px; /* Keeps text away from the scrollbar */
+    margin-bottom: 20px;
+}
+
+.help-text p {
+    margin-top: 5px;
+    margin-bottom: 12px;
+    line-height: 1.5;
+    font-size: 14px;
+}
