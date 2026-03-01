@@ -156,15 +156,43 @@ window.addEventListener('resize', fitToScreen);
 
 function drawGuides() {
     const guideStyle = { stroke: '#00ccff', strokeWidth: 4, selectable: false, evented: false, strokeDashArray: [15, 15], isGuide: true };
+    
+    // --- 1. THE FOLD GUIDES ---
     for (let i = 1; i <= 3; i++) {
         let x = (currentWidth / 4) * i;
         canvas.add(new fabric.Line([x, 0, x, currentHeight], guideStyle));
     }
     canvas.add(new fabric.Line([0, currentHeight / 2, currentWidth / 4, currentHeight / 2], guideStyle));
     canvas.add(new fabric.Line([(currentWidth / 4) * 3, currentHeight / 2, currentWidth, currentHeight / 2], guideStyle));
+    
+    // The Center Cut
     canvas.add(new fabric.Line([currentWidth / 4, currentHeight / 2, (currentWidth / 4) * 3, currentHeight / 2], {
         stroke: 'red', strokeWidth: 8, selectable: false, evented: false, isGuide: true
     }));
+
+    // --- 2. THE PERIMETER PRINTER MARGIN ---
+    const marginToggle = document.getElementById('marginToggle');
+    const showMargins = marginToggle ? marginToggle.checked : true;
+    
+    const marginPx = 60; // Approx 5mm non-printable hardware edge at 300dpi
+    
+    const hardwareMargin = new fabric.Rect({
+        left: marginPx,
+        top: marginPx,
+        width: currentWidth - (marginPx * 2),
+        height: currentHeight - (marginPx * 2),
+        fill: 'transparent',
+        stroke: 'rgba(255, 165, 0, 0.8)', // Orange warning border
+        strokeWidth: 4,
+        strokeDashArray: [20, 10],
+        selectable: false,
+        evented: false,
+        isGuide: true,
+        isMargin: true, // Custom tag for the toggle
+        opacity: showMargins ? 1 : 0
+    });
+    
+    canvas.add(hardwareMargin);
 }
 
 function drawLabels() {
@@ -202,9 +230,79 @@ document.getElementById('loadProject').addEventListener('change', (e) => {
     reader.readAsText(e.target.files[0]);
 });
 
-document.addEventListener('keydown', function(event) {
-    if ((event.ctrlKey || event.metaKey) && event.key === 'z') { event.preventDefault(); undo(); }
+// --- BLEND MODES & OPACITY ---
+document.getElementById('objectOpacity').addEventListener('input', (e) => {
+    const activeObj = canvas.getActiveObject();
+    const val = parseFloat(e.target.value);
+    document.getElementById('opacityVal').textContent = Math.round(val * 100) + '%';
+    
+    if (activeObj) {
+        activeObj.set('opacity', val);
+        canvas.requestRenderAll();
+    }
 });
+
+document.getElementById('objectOpacity').addEventListener('change', () => {
+    if (canvas.getActiveObject()) saveHistory(); 
+});
+
+document.getElementById('blendMode').addEventListener('change', (e) => {
+    const activeObj = canvas.getActiveObject();
+    if (activeObj) {
+        // Fabric.js uses globalCompositeOperation for standard HTML5 canvas blend modes
+        activeObj.set('globalCompositeOperation', e.target.value);
+        canvas.requestRenderAll();
+        saveHistory();
+    }
+});
+
+// --- KEYBOARD SHORTCUTS ---
+document.addEventListener('keydown', function(event) {
+    // 1. Undo (Ctrl+Z / Cmd+Z)
+    if ((event.ctrlKey || event.metaKey) && event.key === 'z') { 
+        event.preventDefault(); 
+        undo(); 
+        return;
+    }
+
+    const activeObj = canvas.getActiveObject();
+    const activeObjects = canvas.getActiveObjects();
+
+    // 2. Delete / Backspace
+    if (event.key === 'Delete' || event.key === 'Backspace') {
+        // SAFETY: Don't delete if user is typing in a text field or editing a text object
+        if (document.activeElement.tagName === 'INPUT' || 
+            (activeObj && activeObj.isEditing)) {
+            return; 
+        }
+
+        if (activeObjects.length > 0) {
+            event.preventDefault();
+            activeObjects.forEach(obj => {
+                if (!obj.isGuide) canvas.remove(obj);
+            });
+            canvas.discardActiveObject();
+            canvas.requestRenderAll();
+            saveHistory(); // Ensure the deletion is added to Undo history
+        }
+    }
+
+    // 3. Escape Key (Close Modals & Deselect)
+    if (event.key === 'Escape') {
+        const previewModal = document.getElementById('previewModal');
+        const helpModal = document.getElementById('helpModal');
+        
+        if (previewModal.style.display === 'flex') {
+            previewModal.style.display = 'none';
+        } else if (helpModal.style.display === 'flex') {
+            helpModal.style.display = 'none';
+        } else if (activeObj) {
+            canvas.discardActiveObject();
+            canvas.requestRenderAll();
+        }
+    }
+});
+
 document.getElementById('undoBtn').addEventListener('click', undo);
 
 document.getElementById('paperSize').addEventListener('change', (e) => {
@@ -218,6 +316,65 @@ document.getElementById('canvasColor').addEventListener('input', (e) => {
 });
 document.getElementById('canvasColor').addEventListener('change', () => {
     saveHistory(); 
+});
+
+// Toggle Printer Margins visibility
+const marginToggle = document.getElementById('marginToggle');
+if (marginToggle) {
+    marginToggle.addEventListener('change', (e) => {
+        const show = e.target.checked;
+        canvas.getObjects().forEach(obj => {
+            if (obj.isMargin) {
+                obj.set('opacity', show ? 1 : 0);
+            }
+        });
+        canvas.requestRenderAll();
+    });
+}
+
+// --- DRAG AND DROP UPLOAD ---
+const workspace = document.getElementById('workspace');
+
+// Prevent the browser from opening the image in a new tab
+workspace.addEventListener('dragover', (e) => {
+    e.preventDefault(); 
+    e.dataTransfer.dropEffect = 'copy';
+});
+
+workspace.addEventListener('drop', (e) => {
+    e.preventDefault();
+    
+    // Filter out non-image files just in case
+    const files = Array.from(e.dataTransfer.files).filter(file => file.type.startsWith('image/'));
+    if (files.length === 0) return;
+
+    // Get the exact drop coordinates relative to the Fabric canvas
+    const pointer = canvas.getPointer(e);
+
+    files.forEach((file, index) => {
+        const objectUrl = URL.createObjectURL(file);
+        
+        fabric.Image.fromURL(objectUrl, function(image) {
+            image.scaleToWidth(800); 
+            const offset = index * 40; // Stagger multiple drops
+            
+            image.set({ 
+                left: pointer.x + offset, 
+                top: pointer.y + offset, 
+                originX: 'center', 
+                originY: 'center',
+                zineFileName: file.name 
+            });
+            
+            canvas.add(image);
+            
+            if (index === files.length - 1) {
+                canvas.setActiveObject(image);
+                canvas.requestRenderAll(); 
+                saveHistory();
+            }
+        });
+    });
 });
 
 // --- TYPOGRAPHY ---
@@ -267,10 +424,27 @@ canvas.on('selection:created', updateUI);
 
 function updateUI(e) {
     const activeObj = e.selected[0];
-    if (activeObj && activeObj.type === 'i-text') {
+    if (!activeObj) return;
+
+    // 1. Update Typography UI if it's text
+    if (activeObj.type === 'i-text') {
         document.getElementById('fontFamily').value = activeObj.fontFamily;
         document.getElementById('fontSize').value = activeObj.fontSize;
         document.getElementById('textColor').value = activeObj.fill;
+    }
+
+    // 2. Update Opacity & Blend Mode UI for ALL objects (images and text)
+    const opacitySlider = document.getElementById('objectOpacity');
+    const opacityLabel = document.getElementById('opacityVal');
+    const blendSelect = document.getElementById('blendMode');
+
+    if (opacitySlider && blendSelect) {
+        const currentOpacity = activeObj.opacity !== undefined ? activeObj.opacity : 1;
+        opacitySlider.value = currentOpacity;
+        opacityLabel.textContent = Math.round(currentOpacity * 100) + '%';
+        
+        const currentBlend = activeObj.globalCompositeOperation || 'source-over';
+        blendSelect.value = currentBlend;
     }
 }
 

@@ -1,3 +1,65 @@
+/* 1. Lock the entire page down from the root */
+html, body {
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    overflow: hidden; /* Kills the global phantom scrollbar */
+}
+
+/* 2. Universal Box Sizing */
+* {
+    box-sizing: border-box;
+}
+
+/* 3. The "Transparent-to-Visible" Scrollbar Trick */
+/* Keep width permanent so the layout math never shifts */
+#left-toolbar::-webkit-scrollbar,
+#layersContainer::-webkit-scrollbar {
+    width: 6px; 
+    background: transparent;
+}
+
+#left-toolbar::-webkit-scrollbar-track,
+#layersContainer::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+/* Make the thumb invisible by default */
+#left-toolbar::-webkit-scrollbar-thumb,
+#layersContainer::-webkit-scrollbar-thumb {
+    background: transparent; 
+    border-radius: 10px;
+}
+
+/* Only color the thumb when hovering over the panel */
+#left-toolbar:hover::-webkit-scrollbar-thumb,
+#layersContainer:hover::-webkit-scrollbar-thumb {
+    background: #bbb;
+}
+
+#left-toolbar::-webkit-scrollbar-thumb:hover,
+#layersContainer::-webkit-scrollbar-thumb:hover {
+    background: #888;
+}
+
+/* Only reveals the scrollbar when your mouse is over the panel */
+#left-toolbar:hover::-webkit-scrollbar,
+#layersContainer:hover::-webkit-scrollbar {
+    width: 6px;
+}
+
+#left-toolbar::-webkit-scrollbar-thumb,
+#layersContainer::-webkit-scrollbar-thumb {
+    background: #bbb;
+    border-radius: 10px;
+}
+
+#left-toolbar::-webkit-scrollbar-thumb:hover,
+#layersContainer::-webkit-scrollbar-thumb:hover {
+    background: #888;
+}
+
 body {
     margin: 0;
     display: flex;
@@ -12,13 +74,13 @@ body {
 #left-toolbar {
     width: 260px;
     background-color: #f8f9fa;
-    padding: 20px;
+    padding: 2vh 20px; /* Top/bottom padding scales with screen height */
     box-shadow: 2px 0 10px rgba(0,0,0,0.5);
     z-index: 10;
     overflow-y: auto;
     display: flex;
     flex-direction: column;
-    gap: 15px; /* Spaces out the tool sections perfectly */
+    gap: 1.2vh; /* The gaps between sections act like an accordion now */
 }
 
 #workspace {
@@ -49,7 +111,7 @@ body {
 .tool-section {
     display: flex;
     flex-direction: column;
-    gap: 8px;
+    gap: 0.8vh; /* The gaps between individual buttons scale dynamically */
 }
 .tool-section p {
     margin: 0;
@@ -67,7 +129,7 @@ body {
     flex: 1;
 }
 button, .btn-label {
-    padding: 6px 10px;
+    padding: 0.8vh 10px; /* Button height shrinks slightly on small laptop screens */
     cursor: pointer;
     background: #e9ecef;
     border: 1px solid #ccc;
@@ -264,4 +326,40 @@ input[type="number"], select {
     margin-bottom: 12px;
     line-height: 1.5;
     font-size: 14px;
+}
+
+.creator-credit {
+    margin-top: auto; /* Pushes the credit to the bottom of the sidebar */
+    padding-top: 20px;
+    border-top: 1px solid #eee;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+}
+
+.creator-credit .name {
+    font-size: 10px;
+    color: #999;
+    letter-spacing: 2px; /* Gives it that premium Art History feel */
+    font-weight: 700;
+}
+
+.creator-credit .divider {
+    width: 20px;
+    height: 1px;
+    background: #ddd;
+    margin: 4px 0;
+}
+
+.creator-credit .insta-link {
+    font-size: 11px;
+    color: #2196f3;
+    text-decoration: none;
+    font-weight: 500;
+    transition: opacity 0.2s;
+}
+
+.creator-credit .insta-link:hover {
+    opacity: 0.7;
 }
